@@ -1,0 +1,103 @@
+<!DOCTYPE html >
+<html>
+<head>
+    
+    <script src="/js/RGraph/RGraph.common.core.js" ></script>
+    <script src="/js/RGraph/RGraph.line.js" ></script>
+	<script src="/js/socket.io.js" ></script>
+	<script src="/js/jsonrpc-ws-client.js" ></script>
+	
+    <!--[if lt IE 9]><script src="/js/excanvas/excanvas.js"></script><![endif]-->
+    
+    <title>dcp status</title>
+</head>
+
+<body>
+    
+	<div id="showStartBtn">
+        <p>can not connect to 3001</p>
+    </div>
+	
+	<script type="text/javascript">
+	    //connect to rpc server
+		var rpcSocket = io.connect("<%=servAddr%>:3001");
+		var rpc = new rpcClient(rpcSocket);
+		
+		rpcSocket.on("connect", function(){
+            document.getElementById("showStartBtn").innerHTML =
+                '<input type="text" id="timeout" value="500"></input> <input type="button" id="statBtn" value="start" onclick="statClick()"></input>';		    
+		});
+
+		rpcSocket.on('message', function(r){ console.log("response: " + r) }) 
+		
+		function handleResp(resp){
+		    alert(JSON.stringify(resp));
+		    if(resp.error)
+			    alert("error: " + JSON.stringify(resp.error));
+		};
+		
+	    function statClick() {
+		    //alert(document.getElementById("timeout").value);
+			//alert("hello");
+		    var btn = document.getElementById("statBtn");
+			
+			if(btn.value == "start") {
+			    rpc.call("rpc.startStat",
+				         document.getElementById("timeout").value,
+                         handleResp);						 
+			    btn.value = "stop";
+
+			} else {			    
+			    rpc.call("rpc.stopStat",
+                         handleResp);						 
+                btn.value = "start";
+			}
+		}
+	</script>
+	
+	
+    <h1>DCP Server Status</h1>
+    <p id="ioServ">data channel is unavailable<p>
+    <canvas id="cvs" width="600" height="250">[No canvas support]</canvas>
+    
+    <script>
+	
+	    var dataSocket = io.connect('<%=servAddr%>:3002');		
+		
+        dataSocket.on('connect', function(){
+		    //alert('connected');
+			document.getElementById("ioServ").innerHTML = "io server connected";
+		});
+
+		dataSocket.on('dcpStat', function(data){
+		    //console.log(data);
+			var stat = eval('(' + data + ')');
+		    DrawGraph(stat.servStat.syncTime) ;
+		});
+        data = RGraph.array_pad([], 50);
+
+        function DrawGraph (newData)
+        {	
+            RGraph.Clear(document.getElementById("cvs"));
+            RGraph.ObjectRegistry.Clear();
+
+            var line = new RGraph.Line('cvs', data);
+            line.Set('chart.colors', ['green']);
+            line.Set('chart.linewidth', 1);
+            //line.Set('chart.filled', true);
+            //line.Set('chart.fillstyle', 'rgba(128,255,128,0.5)');
+            line.Set('chart.ymax', 60);
+            line.Set('chart.numxticks', 5);
+            line.Set('chart.labels', ['Now','25s','50s','75s','100s','125s']);
+            line.Draw();
+
+            //r    = RGraph.random(0,60);
+            data = [newData].concat(data);
+            data.pop();
+           
+            //setTimeout(DrawGraph, 250);
+        }
+        
+    </script>
+</body>
+</html>
