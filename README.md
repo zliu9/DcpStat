@@ -1,7 +1,12 @@
 DcpStat
 =======
 
-Emulate collect and display DCP status
+简介
+- 演示如何用nodejs访问外部程序库
+- 如何创建jsonRPC服务器
+- 浏览器如何通过jsonRPC向服务器传输命令
+- socket.io工作机制，如何在服务器和客户端之间传输数据
+- 如何用express创建http服务器
 
 准备工作
 - 安装VC2010
