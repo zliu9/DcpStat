@@ -34,4 +34,4 @@ DcpStat
 - 运行EmuStat\Debug\EmuStat.exe
 - 进入server，运行node app.js
 - 打开浏览器，输入地址http://127.0.0.1:3000
-- 127.0.0.1可以修改为配置的servAddr的值
+- 127.0.0.1可以配置为想要的ip，修改Server/app.js中的servAddr即可
